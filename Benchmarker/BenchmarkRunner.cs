@@ -48,15 +48,14 @@ namespace Benchmarker
 
                 // Give the test as good a chance as possible
                 // of avoiding garbage collection
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
 
                 var runTimes = new List<double>();
 
                 for (int i = 0; i < _benchmarkRunCount; i++)
                 {
+                    ForceGarbageCollection();
                     var stopWatch = Stopwatch.StartNew();
+
                     method.Invoke(null, null);
                     stopWatch.Stop();
 #if DEBUG
@@ -67,6 +66,13 @@ namespace Benchmarker
 
                 Console.WriteLine($"Method: {method.Name}, Average Time (ms): {runTimes.Average()}");
             }
+        }
+
+        private static void ForceGarbageCollection()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         private static void WarmupMethod(MethodInfo method)
